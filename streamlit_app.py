@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import os
 from datetime import datetime
 
@@ -58,22 +57,14 @@ if not df.empty:
     m3.metric("Ahorro Neto Real", f"{ahorro_real:,.2f} €")
 
     st.markdown("---")
-    tab1, tab2, tab3 = st.tabs(["Evolución Mensual", "Distribución de Gastos", "Histórico Completo"])
+    tab1, tab2 = st.tabs(["Evolución de Gastos", "Histórico Completo"])
     
     with tab1:
-        df_mensual = df_filtrado.groupby(['Año-Mes', 'Tipo'])['Monto'].sum().reset_index()
-        if not df_mensual.empty:
-            fig_mes = px.bar(df_mensual, x='Año-Mes', y='Monto', color='Tipo', barmode='group', color_discrete_map={'Ingreso': '#2ecc71', 'Gasto': '#e74c3c'})
-            st.plotly_chart(fig_mes, use_container_width=True)
+        df_gastos_m = df_filtrado[df_filtrado['Tipo'] == 'Gasto'].groupby('Año-Mes')['Monto'].sum()
+        if not df_gastos_m.empty:
+            st.bar_chart(df_gastos_m)
             
     with tab2:
-        df_gastos = df_filtrado[df_filtrado['Tipo'] == 'Gasto']
-        if not df_gastos.empty:
-            fig_pie = px.pie(df_gastos, values='Monto', names='Categoría', hole=0.4)
-            st.plotly_chart(fig_pie, use_container_width=True)
-
-    with tab3:
         st.dataframe(df.sort_values(by="Fecha", ascending=False), use_container_width=True)
 else:
     st.info("👋 Registra tu primera transacción a la izquierda.")
-
